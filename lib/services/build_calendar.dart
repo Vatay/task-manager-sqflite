@@ -13,6 +13,7 @@ class BuildCalendar {
     DateTime.now().day,
   );
   List<TableRow> calendarGrid = [];
+  bool _thisDay = false;
 
   TableRow calendarGridTitles = TableRow(
     children: List.generate(
@@ -32,7 +33,6 @@ class BuildCalendar {
     int startWeekday = DateTime(year, month).weekday;
     int lastWeekday = DateTime(year, month, daysCurrentMonth).weekday;
     int monthYear;
-    bool thisDay = false;
 
     List<TableBodyCell> rowItems = [];
 
@@ -59,45 +59,25 @@ class BuildCalendar {
       }
       for (var i = startWeekday; i > 1; i--) {
         DateTime currentDay = DateTime(year, month - 1, daysPrevMonth - i + 2);
-        thisDay = false;
-        EventModel? events = null;
-        filterEvents.forEach((element) {
-          if (element.date == currentDay) {
-            events = element;
-          }
-        });
-
-        if (today == currentDay) {
-          thisDay = true;
-        }
+        EventModel? events = _eventsAndThisDay(filterEvents, currentDay);
         rowItems.add(TableBodyCell(
           day: daysPrevMonth - i + 2,
           currentMonth: false,
           date: DateTime(year, month - 1, daysPrevMonth - i + 2),
           events: events,
-          thisDay: thisDay,
+          thisDay: _thisDay,
         ));
       }
     }
     // Вибраный місяць
     for (var i = 1; i < daysCurrentMonth + 1; i++) {
-      EventModel? events = null;
       DateTime currentDay = DateTime(year, month, i);
-      thisDay = false;
-      filterEvents.forEach((element) {
-        if (element.date == currentDay) {
-          events = element;
-        }
-      });
-
-      if (today == currentDay) {
-        thisDay = true;
-      }
+      EventModel? events = _eventsAndThisDay(filterEvents, currentDay);
       rowItems.add(TableBodyCell(
         day: i,
         date: DateTime(year, month, i),
         events: events,
-        thisDay: thisDay,
+        thisDay: _thisDay,
       ));
       if (startWeekday == 7) {
         calendarGrid.add(
@@ -118,24 +98,15 @@ class BuildCalendar {
         year += 1;
       }
       for (var i = 1; i <= 7 - lastWeekday; i++) {
-        EventModel? events = null;
         DateTime currentDay = DateTime(year, monthYear, i);
-        thisDay = false;
-        filterEvents.forEach((element) {
-          if (element.date == currentDay) {
-            events = element;
-          }
-        });
-        if (today == currentDay) {
-          thisDay = true;
-        }
+        EventModel? events = _eventsAndThisDay(filterEvents, currentDay);
         rowItems.add(
           TableBodyCell(
             day: i,
             currentMonth: false,
             date: DateTime(year, monthYear, i),
             events: events,
-            thisDay: thisDay,
+            thisDay: _thisDay,
           ),
         );
       }
@@ -147,5 +118,20 @@ class BuildCalendar {
     }
 
     return calendarGrid;
+  }
+
+  EventModel? _eventsAndThisDay(
+      List<EventModel> filterEvents, DateTime currentDay) {
+    _thisDay = false;
+    EventModel? events = null;
+    filterEvents.forEach((element) {
+      if (element.date == currentDay) {
+        events = element;
+      }
+    });
+    if (today == currentDay) {
+      _thisDay = true;
+    }
+    return events;
   }
 }

@@ -42,41 +42,11 @@ class _DayScreenState extends State<DayScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
-          centerTitle: true,
-          leading: IconButton(
-            onPressed: () {
-              context.read<CalendarCubit>().getData();
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back),
-          ),
-          title: Text('Події ${dayDate.day}.${dayDate.month}.${dayDate.year}'),
-        ),
+        appBar: _appBar(context),
         body: BlocBuilder<CalendarCubit, CalendarState>(
           builder: (context, state) {
             if (state is CalendarError) {
-              return Column(
-                children: [
-                  Text(
-                    'Виникла помилка:',
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    state.error,
-                    textAlign: TextAlign.center,
-                    maxLines: 5,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<CalendarCubit>().getData();
-                      Navigator.pop(context);
-                    },
-                    child: Text('Спробувати знову'),
-                  ),
-                ],
-              );
+              return _errorBody(context, state);
             }
             return SingleChildScrollView(
               padding: const EdgeInsets.all(12),
@@ -124,6 +94,44 @@ class _DayScreenState extends State<DayScreen> {
     );
   }
 
+  AppBar _appBar(BuildContext context) {
+    return AppBar(
+      centerTitle: true,
+      leading: IconButton(
+        onPressed: () {
+          context.read<CalendarCubit>().getData();
+          Navigator.pop(context);
+        },
+        icon: Icon(Icons.arrow_back),
+      ),
+      title: Text('Події ${dayDate.day}.${dayDate.month}.${dayDate.year}'),
+    );
+  }
+
+  Column _errorBody(BuildContext context, CalendarError state) {
+    return Column(
+      children: [
+        Text(
+          'Виникла помилка:',
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          state.error,
+          textAlign: TextAlign.center,
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+        ),
+        ElevatedButton(
+          onPressed: () {
+            context.read<CalendarCubit>().getData();
+            Navigator.pop(context);
+          },
+          child: Text('Спробувати знову'),
+        ),
+      ],
+    );
+  }
+
 // '9:0+|+Event1-|-9:0+|+Event2-|-19:0+|+Event3-|-';
   _submitForm(BuildContext context) {
     String eventText = _eventText();
@@ -150,6 +158,7 @@ class _DayScreenState extends State<DayScreen> {
       setState(() {});
       _taskNameController.clear();
       _showSnackBar();
+      FocusScope.of(context).unfocus();
     } else {
       print('No validate');
     }
